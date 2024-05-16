@@ -4,4 +4,4 @@
 
 # 效果图如下
 
-![](example.png)
+![](public/example.png)
