@@ -1,19 +1,7 @@
 # lv-video-pane
 
-## Project setup
-```
-npm install
-```
+该组件是基于Vue2进行封装的时间组件，添加多种可配置项，时间可以精确到分，也可以精确到秒
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+# 效果图如下
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+![](example.png)
