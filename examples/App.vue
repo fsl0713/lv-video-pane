@@ -7,7 +7,7 @@
         :select-data="videoTypeList"
         template-type="1"
         :is-show-select="true"
-        :isShowSecond="true" />
+        :endThreShold="24" />
       
       <div class="video-data" @click="handleClick">获取录像计划数据</div>
     </div>
@@ -46,6 +46,7 @@ body {
 }
 #app {
   padding: 20px;
+  padding-top: 150px;
 }
 .video-data {
   border: 1px solid #ccc; 

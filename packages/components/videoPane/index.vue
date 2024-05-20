@@ -105,7 +105,7 @@
                   <el-input-number
                     v-model="item.endhour"
                     :min="0" 
-                    :max="23" 
+                    :max="setMaxEnd" 
                     maxlength="2" 
                     :controls="false"
                     placeholder="时" />
@@ -156,6 +156,13 @@ export default {
     mode: { type: String, default: () => 'operation' }, // 当前模式，操作：operation， 查看: view
     isShowSelect: { type: Boolean, default: () => true }, // 是否展示下拉框
     isShowSecond: { type: Boolean, default: () => false }, // 是否展示秒
+    endThreShold: { 
+      type: Number, 
+      default: () => 23,
+      validator: (value) => {
+        return [23, 24].indexOf(value) !== -1
+      }
+    }, // 最终临界值: 23或者24
   },
   data() {
     return {
@@ -211,6 +218,12 @@ export default {
         return obj ? obj.label : '';
       };
     },
+    setMaxEnd() {
+      let arr = [23, 24];
+      let str = arr.includes(this.endThreShold);
+      str = str ? this.endThreShold : 23;
+      return str;
+    }
   },
   watch: {
     backArr: {
@@ -600,7 +613,13 @@ export default {
       minute = minute >= 10 ? minute : '0' + minute;
       second = second >= 10 ? second : '0' + second;
       if(Number(hour) >= 24 && Number(minute) === 0 && Number(second) === 0) {
-        return this.isShowSecond ? '23:59:59' : '23:59';
+        let obj = {
+          23: this.isShowSecond ? '23:59:59' : '23:59',
+          24: this.isShowSecond ? '24:00:00' : '24:00'
+        }
+        const defaultTime = this.isShowSecond ? '23:59:59' : '23:59';
+        let endThdata = obj[this.endThreShold] ? obj[this.endThreShold] : defaultTime;
+        return endThdata;
       } else {
         return this.isShowSecond ? hour + ":" + minute + ":" + second : hour + ":" + minute;
       }
@@ -784,12 +803,20 @@ export default {
     },
     // 确定精确到分
     setValueHourMinute(item) {
+      if(this.isCheckType(item.starthour) || this.isCheckType(item.startminute) || this.isCheckType(item.endhour) || this.isCheckType(item.endminute)) {
+        return this.$message.warning('时间不能为空')
+      }
       if(Number(item.starthour) > Number(item.endhour)) {
         return this.$message.warning('开始时间不能大于结束时间！');
       }
       if(Number(item.starthour) === Number(item.endhour)) {
         if(Number(item.startminute) >= Number(item.endminute)) {
           return this.$message.warning('开始时间不能大于结束时间');
+        }
+      }
+      if(this.endThreShold === 24 && Number(item.endhour) >= 24) {
+        if(Number(item.endminute) > 0) {
+          return this.$message.warning('结束时间最大为24:00');
         }
       }
       // 查找比当前片段起始位置大的片段
@@ -821,6 +848,9 @@ export default {
     },
     // 确定精确到秒
     setValueHourMinuteSecond(item) {
+      if(this.isCheckType(item.starthour) || this.isCheckType(item.startminute) || this.isCheckType(item.startsecond) || this.isCheckType(item.endhour) || this.isCheckType(item.endminute) || this.isCheckType(item.endsecond)) {
+        return this.$message.warning('时间不能为空');
+      }
       if(Number(item.starthour) > Number(item.endhour)) {
         return this.$message.warning('开始时间不能大于结束时间');
       }
@@ -830,6 +860,11 @@ export default {
         }
         if(Number(item.startminute) === Number(item.endminute) && Number(item.startsecond) > Number(item.endsecond)) {
           return this.$message.warning('开始时间不能大于结束时间');
+        }
+      }
+      if(this.endThreShold === 24 && Number(item.endhour) >= 24) {
+        if(Number(item.endminute) > 0 || Number(item.endsecond) > 0) {
+          return this.$message.warning('结束时间最大为24:00:00');
         }
       }
       // 查找比当前片段起始位置大的片段
@@ -894,6 +929,13 @@ export default {
     transferFormatTime(time) {
       return Number(time) >= 10 ? time : "0" + time;
     },
+    isCheckType(value) {
+      let str = false;
+      if(value === '' || value === null || value === undefined) {
+        str = true;
+      }
+      return str;
+    }
   },
 }
 </script>
