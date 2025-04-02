@@ -7,7 +7,8 @@
         :select-data="videoTypeList"
         template-type="1"
         :is-show-select="true"
-        :endThreShold="24" />
+        :endThreShold="24"
+        :maxPane="4" />
       
       <div class="video-data" @click="handleClick">获取录像计划数据</div>
     </div>

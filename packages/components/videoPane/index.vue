@@ -163,6 +163,7 @@ export default {
         return [23, 24].indexOf(value) !== -1
       }
     }, // 最终临界值: 23或者24
+    maxPane: { type: Number, default: () => -1 }, // 最大可以创建多少个片段
   },
   data() {
     return {
@@ -308,6 +309,7 @@ export default {
     // 父级鼠标按下
     parentMouseDown(e) {
       if (this.mode === "view") return;
+      if (this.maxPane !== -1 && this.maxPane <= this.videoArr.length) return;
       this.isMouseDown = true;
       let event = e || window.event;
       event.stopPropagation();
