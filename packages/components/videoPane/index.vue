@@ -266,8 +266,8 @@ export default {
     setTips(item, type) {
       if (type === "left") {
         let str = "";
-        if (item.startTime) {
-          str = item.startTime;
+        if (!this.isCheckType(item.startTime)) {
+          str = this.normalizeTimeValue(item.startTime);
         } else {
           let leftX = (item.startX * (this.maxScale - 1) * 2) / this.width;
           str = this.translateDate(leftX.toFixed(3));
@@ -275,8 +275,8 @@ export default {
         return str;
       } else if (type === "right") {
         let str2 = "";
-        if (item.endTime) {
-          str2 = item.endTime;
+        if (!this.isCheckType(item.endTime)) {
+          str2 = this.normalizeTimeValue(item.endTime);
         } else {
           let rightX = ((item.startX + item.width) * (this.maxScale - 1) * 2) / this.width;
           str2 = this.translateDate(rightX.toFixed(3));
@@ -607,20 +607,25 @@ export default {
     },
     // 将小数转换为点
     translateDate(item) {
-      let s = item * 3600;
+      const defaultTime = this.isShowSecond ? '00:00:00' : '00:00';
+      const current = Number(item);
+      if(!Number.isFinite(current) || current < 0) {
+        return defaultTime;
+      }
+      let s = current * 3600;
       let hour = Math.floor(s / 3600);
       let minute = Math.floor((s % 3600) / 60);
       let second = Math.floor(s % 60);
-      hour = hour >= 10 ? hour : '0' + hour;
-      minute = minute >= 10 ? minute : '0' + minute;
-      second = second >= 10 ? second : '0' + second;
+      hour = this.transferFormatTime(hour);
+      minute = this.transferFormatTime(minute);
+      second = this.transferFormatTime(second);
       if(Number(hour) >= 24 && Number(minute) === 0 && Number(second) === 0) {
         let obj = {
           23: this.isShowSecond ? '23:59:59' : '23:59',
           24: this.isShowSecond ? '24:00:00' : '24:00'
         }
-        const defaultTime = this.isShowSecond ? '23:59:59' : '23:59';
-        let endThdata = obj[this.endThreShold] ? obj[this.endThreShold] : defaultTime;
+        const endDefaultTime = this.isShowSecond ? '23:59:59' : '23:59';
+        let endThdata = obj[this.endThreShold] ? obj[this.endThreShold] : endDefaultTime;
         return endThdata;
       } else {
         return this.isShowSecond ? hour + ":" + minute + ":" + second : hour + ":" + minute;
@@ -919,17 +924,41 @@ export default {
       });
     },
     calcuteTime(time, type) {
-      if(!time) return 0;
-      let str = time.toString().split(":");
-      let params = {
-        hour: str[0],
-        minute: str[1],
-        second: str[2]
+      const defaultValues = {
+        hour: '00',
+        minute: '00',
+        second: '00'
       };
-      return params[type];
+      const normalizeTime = this.normalizeTimeValue(time);
+      let str = normalizeTime.toString().split(":");
+      let params = {
+        hour: str[0] || defaultValues.hour,
+        minute: str[1] || defaultValues.minute,
+        second: str[2] || defaultValues.second
+      };
+      return params[type] || defaultValues[type] || '00';
     },
     transferFormatTime(time) {
-      return Number(time) >= 10 ? time : "0" + time;
+      const current = Number(time);
+      if(!Number.isFinite(current) || current < 0) {
+        return '00';
+      }
+      return String(Math.floor(current)).padStart(2, '0');
+    },
+    normalizeTimeValue(time) {
+      const defaultTime = this.isShowSecond ? '00:00:00' : '00:00';
+      if(this.isCheckType(time)) {
+        return defaultTime;
+      }
+      const str = String(time).trim();
+      if(!str) {
+        return defaultTime;
+      }
+      const timeArr = str.split(':');
+      const hour = this.transferFormatTime(timeArr[0]);
+      const minute = this.transferFormatTime(timeArr[1]);
+      const second = this.transferFormatTime(timeArr[2]);
+      return this.isShowSecond ? `${hour}:${minute}:${second}` : `${hour}:${minute}`;
     },
     isCheckType(value) {
       let str = false;

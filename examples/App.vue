@@ -46,7 +46,7 @@ body {
   padding: 0;
 }
 #app {
-  padding: 20px;
+  padding: 140px;
 }
 .video-data {
   border: 1px solid #ccc; 
